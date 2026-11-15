@@ -1,0 +1,48 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         Int        @id @default(autoincrement())
+  name       String    
+  email      String     @unique
+  created_at DateTime   @default(now())
+  tasks      Task[]
+  reminders  Reminder[]
+
+  @@map("users")
+}
+
+model Task {
+  id          Int      @id @default(autoincrement())
+  user_id     Int
+  title       String  
+  description String?
+  status      String   @default("pending")
+  due_at      DateTime?
+  created_at  DateTime @default(now())
+  user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@map("tasks")
+}
+
+model Reminder {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  title      String  
+  message    String?
+  remind_at  DateTime
+  completed  Boolean  @default(false)
+  created_at DateTime @default(now())
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([remind_at])
+  @@map("reminders")
+}
